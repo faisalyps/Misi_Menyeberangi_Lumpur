@@ -28,7 +28,8 @@
         }
 
         .plank {
-            transition: width 0.3s ease;
+            /* REVISI: Mengubah transition ke 'all' agar perubahan tebal papan juga mulus */
+            transition: all 0.3s ease;
         }
 
         .sink-anim {
@@ -55,7 +56,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <!-- Header -->
     <header class="text-center mb-6 w-full max-w-4xl">
         <h1 class="text-3xl md:text-4xl font-bold text-blue-800 mb-2">👣 Misi Menyeberang Lumpur</h1>
         <p class="text-gray-600">Pilih kombinasi Orang & Papan agar tidak tenggelam!</p>
@@ -63,11 +63,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl">
         
-        <!-- Controls Panel -->
         <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-blue-100 lg:col-span-1">
             <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-sliders-h mr-2"></i>Atur Strategi</h2>
             
-            <!-- Pilih Orang (Gaya) -->
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-700 mb-2">1. Pilih Penjelajah (Gaya Berat/F)</label>
                 <div class="grid grid-cols-2 gap-3">
@@ -86,7 +84,6 @@
                 </div>
             </div>
 
-            <!-- Pilih Papan (Luas) -->
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-700 mb-2">2. Pilih Papan (Luas/A)</label>
                 <div class="grid grid-cols-2 gap-3">
@@ -105,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- Action Button -->
             <button onclick="runSimulation()" id="start-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center">
                 <i class="fas fa-play mr-2"></i> MULAI MISI
             </button>
@@ -114,39 +110,29 @@
             </button>
         </div>
 
-        <!-- Simulation View -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-blue-100 lg:col-span-2 relative flex flex-col">
             <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow border border-gray-200">
                 <span class="text-xs font-bold text-gray-600">BATAS AMAN: Maks 2100 Pa</span>
             </div>
 
-            <!-- Visual Stage -->
             <div class="flex-grow relative bg-sky-200 min-h-[300px] flex items-end justify-center overflow-hidden">
-                <!-- Background Scenery -->
-                <div class="absolute bottom-0 w-full h-24 bg-green-500 z-0"></div> <!-- Grass Left -->
-                <div class="absolute bottom-0 w-full h-32 mud-pattern z-0 flex items-center justify-center">
+                <div class="absolute bottom-0 w-full h-24 bg-green-500 z-0"></div> <div class="absolute bottom-0 w-full h-32 mud-pattern z-0 flex items-center justify-center">
                     <span class="text-white/20 font-bold text-4xl select-none">LUMPUR</span>
                 </div>
 
-                <!-- Simulation Area -->
                 <div class="relative w-full max-w-md h-64 z-10 flex items-end mb-16">
-                    <!-- Left Bank -->
                     <div class="w-1/4 h-4 bg-green-600 rounded-r-lg absolute bottom-0 left-0"></div>
                     
-                    <!-- The Plank -->
-                    <div id="visual-plank" class="plank h-3 bg-orange-700 border border-orange-900 absolute bottom-4 left-1/4 rounded shadow-lg origin-left" style="width: 100px;"></div>
+                    <div id="visual-plank" class="plank h-3 bg-orange-700 border border-orange-900 absolute bottom-4 left-1/4 rounded shadow-lg origin-left" style="width: 50%;"></div>
                     
-                    <!-- The Character -->
                     <div id="visual-char" class="character absolute bottom-7 left-8 flex flex-col items-center" style="width: 60px;">
                         <span id="char-emoji" class="text-6xl filter drop-shadow-lg">👦</span>
                     </div>
 
-                    <!-- Right Bank (Goal) -->
                     <div class="w-1/4 h-4 bg-green-600 rounded-l-lg absolute bottom-0 right-0"></div>
                 </div>
             </div>
 
-            <!-- Result Box -->
             <div id="result-box" class="p-6 bg-gray-50 border-t border-gray-200 hidden">
                 <div class="flex items-center justify-between">
                     <div>
@@ -163,7 +149,6 @@
         </div>
     </div>
 
-    <!-- Data Log Table -->
     <div class="w-full max-w-6xl mt-6 bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-100">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-clipboard-list mr-2"></i>Data Pengamatan</h2>
@@ -181,7 +166,6 @@
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="text-gray-700 text-sm">
-                    <!-- Data rows will appear here -->
                     <tr id="empty-row">
                         <td colspan="5" class="p-4 text-center text-gray-400 italic">Belum ada data misi. Silakan mulai simulasi!</td>
                     </tr>
@@ -198,12 +182,12 @@
             trialCount: 0
         };
 
-        // Data Config
+        // Data Config - REVISI: Menggunakan width 50% dan menambahkan height
         const data = {
             budi: { f: 400, name: "Budi", emoji: "👦", massLabel: "Ringan" },
             tono: { f: 800, name: "Pak Tono", emoji: "👨‍🏫", massLabel: "Berat" },
-            sempit: { a: 0.2, name: "Papan Sempit", width: "100px" },
-            luas: { a: 0.8, name: "Papan Luas", width: "250px" }
+            sempit: { a: 0.2, name: "Papan Sempit", width: "50%", height: "10px" }, 
+            luas: { a: 0.8, name: "Papan Luas", width: "50%", height: "20px" }
         };
 
         // DOM Elements
@@ -239,8 +223,9 @@
             document.getElementById(`btn-${plankId}`).classList.add('ring-2', 'ring-orange-500', 'bg-orange-50');
             document.getElementById(`btn-${plankId}`).classList.remove('border-gray-200');
 
-            // Update Visual
+            // Update Visual - REVISI: Update width dan height
             elVisualPlank.style.width = data[plankId].width;
+            elVisualPlank.style.height = data[plankId].height;
             resetAnimation();
         }
 
@@ -339,12 +324,11 @@
 
         function playSound(type) {
             // Simple visual feedback implies sound, but keeping code silent to avoid autoplay policies
-            // In a real app, Audio() objects would go here.
         }
 
         // Initialize
         selectChar('budi');
         selectPlank('sempit');
-</script>
+    </script>
 </body>
 </html>
