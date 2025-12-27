@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Tekanan Zat Padat: Misi Lumpur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .mud-pattern {
+            background-color: #5D4037;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v5.1L6 20.5V20h14v.5z' fill='%234E342E' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .character {
+            transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .plank {
+            transition: width 0.3s ease;
+        }
+
+        .sink-anim {
+            transform: translateY(80px) rotate(-10deg) !important;
+            opacity: 0.6;
+        }
+
+        .cross-anim {
+            transform: translateX(250px) !important;
+        }
+
+        /* Custom Scrollbar for table */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="text-center mb-6 w-full max-w-4xl">
+        <h1 class="text-3xl md:text-4xl font-bold text-blue-800 mb-2">👣 Misi Menyeberang Lumpur</h1>
+        <p class="text-gray-600">Pilih kombinasi Orang & Papan agar tidak tenggelam!</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl">
+        
+        <!-- Controls Panel -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-blue-100 lg:col-span-1">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-sliders-h mr-2"></i>Atur Strategi</h2>
+            
+            <!-- Pilih Orang (Gaya) -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">1. Pilih Penjelajah (Gaya Berat/F)</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectChar('budi')" id="btn-budi" class="char-btn p-3 border-2 rounded-xl flex flex-col items-center hover:bg-blue-50 transition ring-2 ring-blue-500 bg-blue-50">
+                        <span class="text-3xl">👦</span>
+                        <span class="font-bold mt-1">Budi</span>
+                        <span class="text-xs text-gray-500">Massa: 40 kg</span>
+                        <span class="text-xs font-bold text-blue-600">F = 400 N</span>
+                    </button>
+                    <button onclick="selectChar('tono')" id="btn-tono" class="char-btn p-3 border-2 border-gray-200 rounded-xl flex flex-col items-center hover:bg-blue-50 transition">
+                        <span class="text-3xl">👨‍🏫</span>
+                        <span class="font-bold mt-1">Pak Tono</span>
+                        <span class="text-xs text-gray-500">Massa: 80 kg</span>
+                        <span class="text-xs font-bold text-blue-600">F = 800 N</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pilih Papan (Luas) -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-2">2. Pilih Papan (Luas/A)</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectPlank('sempit')" id="btn-sempit" class="plank-btn p-3 border-2 rounded-xl flex flex-col items-center hover:bg-orange-50 transition ring-2 ring-orange-500 bg-orange-50">
+                        <div class="h-2 w-8 bg-orange-700 mb-2 rounded"></div>
+                        <span class="font-bold">Papan Sempit</span>
+                        <span class="text-xs text-gray-500">Kecil</span>
+                        <span class="text-xs font-bold text-orange-600">A = 0.2 m²</span>
+                    </button>
+                    <button onclick="selectPlank('luas')" id="btn-luas" class="plank-btn p-3 border-2 border-gray-200 rounded-xl flex flex-col items-center hover:bg-orange-50 transition">
+                        <div class="h-2 w-16 bg-orange-700 mb-2 rounded"></div>
+                        <span class="font-bold">Papan Luas</span>
+                        <span class="text-xs text-gray-500">Besar</span>
+                        <span class="text-xs font-bold text-orange-600">A = 0.8 m²</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button onclick="runSimulation()" id="start-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center">
+                <i class="fas fa-play mr-2"></i> MULAI MISI
+            </button>
+            <button onclick="resetSim()" id="reset-btn" class="w-full mt-3 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-xl shadow hidden transition">
+                <i class="fas fa-redo mr-2"></i> ULANGI
+            </button>
+        </div>
+
+        <!-- Simulation View -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-blue-100 lg:col-span-2 relative flex flex-col">
+            <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow border border-gray-200">
+                <span class="text-xs font-bold text-gray-600">BATAS AMAN: Maks 1500 Pa</span>
+            </div>
+
+            <!-- Visual Stage -->
+            <div class="flex-grow relative bg-sky-200 min-h-[300px] flex items-end justify-center overflow-hidden">
+                <!-- Background Scenery -->
+                <div class="absolute bottom-0 w-full h-24 bg-green-500 z-0"></div> <!-- Grass Left -->
+                <div class="absolute bottom-0 w-full h-32 mud-pattern z-0 flex items-center justify-center">
+                    <span class="text-white/20 font-bold text-4xl select-none">LUMPUR</span>
+                </div>
+
+                <!-- Simulation Area -->
+                <div class="relative w-full max-w-md h-64 z-10 flex items-end mb-16">
+                    <!-- Left Bank -->
+                    <div class="w-1/4 h-4 bg-green-600 rounded-r-lg absolute bottom-0 left-0"></div>
+                    
+                    <!-- The Plank -->
+                    <div id="visual-plank" class="plank h-3 bg-orange-700 border border-orange-900 absolute bottom-4 left-1/4 rounded shadow-lg origin-left" style="width: 100px;"></div>
+                    
+                    <!-- The Character -->
+                    <div id="visual-char" class="character absolute bottom-7 left-8 flex flex-col items-center" style="width: 60px;">
+                        <span id="char-emoji" class="text-6xl filter drop-shadow-lg">👦</span>
+                    </div>
+
+                    <!-- Right Bank (Goal) -->
+                    <div class="w-1/4 h-4 bg-green-600 rounded-l-lg absolute bottom-0 right-0"></div>
+                </div>
+            </div>
+
+            <!-- Result Box -->
+            <div id="result-box" class="p-6 bg-gray-50 border-t border-gray-200 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800" id="result-title">Hasil Misi</h3>
+                        <p class="text-gray-600 text-sm" id="result-desc">...</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-500 font-mono">Rumus Fisika</div>
+                        <div class="text-2xl font-bold font-mono text-blue-700" id="math-formula">P = F / A</div>
+                        <div class="text-sm font-mono bg-yellow-100 px-2 py-1 rounded mt-1 border border-yellow-300" id="math-calc">400 / 0.2 = 2000 Pa</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Log Table -->
+    <div class="w-full max-w-6xl mt-6 bg-white p-6 rounded-2xl shadow-lg border-2 border-gray-100">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-clipboard-list mr-2"></i>Data Pengamatan</h2>
+            <button onclick="clearTable()" class="text-sm text-red-500 hover:text-red-700 font-semibold">Hapus Data</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                        <th class="p-3 rounded-tl-lg">Percobaan Ke-</th>
+                        <th class="p-3">Gaya (F)</th>
+                        <th class="p-3">Luas (A)</th>
+                        <th class="p-3">Tekanan (P)</th>
+                        <th class="p-3 rounded-tr-lg">Hasil</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body" class="text-gray-700 text-sm">
+                    <!-- Data rows will appear here -->
+                    <tr id="empty-row">
+                        <td colspan="5" class="p-4 text-center text-gray-400 italic">Belum ada data misi. Silakan mulai simulasi!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const state = {
+            char: 'budi', // 'budi' or 'tono'
+            plank: 'sempit', // 'sempit' or 'luas'
+            trialCount: 0
+        };
+
+        // Data Config
+        const data = {
+            budi: { f: 400, name: "Budi", emoji: "👦", massLabel: "Ringan" },
+            tono: { f: 800, name: "Pak Tono", emoji: "👨‍🏫", massLabel: "Berat" },
+            sempit: { a: 0.2, name: "Papan Sempit", width: "100px" },
+            luas: { a: 0.8, name: "Papan Luas", width: "250px" }
+        };
+
+        // DOM Elements
+        const elVisualChar = document.getElementById('visual-char');
+        const elVisualPlank = document.getElementById('visual-plank');
+        const elCharEmoji = document.getElementById('char-emoji');
+        const elResultBox = document.getElementById('result-box');
+        const elStartBtn = document.getElementById('start-btn');
+        const elResetBtn = document.getElementById('reset-btn');
+
+        function selectChar(charId) {
+            state.char = charId;
+            // Update UI State
+            document.querySelectorAll('.char-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+            document.getElementById(`btn-${charId}`).classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+            document.getElementById(`btn-${charId}`).classList.remove('border-gray-200');
+            
+            // Update Visual
+            elCharEmoji.innerText = data[charId].emoji;
+            resetAnimation();
+        }
+
+        function selectPlank(plankId) {
+            state.plank = plankId;
+            // Update UI State
+            document.querySelectorAll('.plank-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-orange-500', 'bg-orange-50');
+                btn.classList.add('border-gray-200');
+            });
+            document.getElementById(`btn-${plankId}`).classList.add('ring-2', 'ring-orange-500', 'bg-orange-50');
+            document.getElementById(`btn-${plankId}`).classList.remove('border-gray-200');
+
+            // Update Visual
+            elVisualPlank.style.width = data[plankId].width;
+            resetAnimation();
+        }
+
+        function resetAnimation() {
+            elVisualChar.classList.remove('sink-anim', 'cross-anim');
+            elVisualChar.style.transform = 'none'; // Force reset
+            elResultBox.classList.add('hidden');
+            elStartBtn.classList.remove('hidden');
+            elResetBtn.classList.add('hidden');
+        }
+
+        function runSimulation() {
+            const F = data[state.char].f;
+            const A = data[state.plank].a;
+            const P = F / A;
+            const maxPressure = 1500; // Threshold
+            const isSuccess = P <= maxPressure;
+
+            state.trialCount++;
+
+            // Disable button during animation
+            elStartBtn.classList.add('hidden');
+
+            // Play Animation
+            setTimeout(() => {
+                if (isSuccess) {
+                    elVisualChar.classList.add('cross-anim');
+                    playSound('success');
+                } else {
+                    // Move to middle then sink
+                    elVisualChar.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        elVisualChar.classList.add('sink-anim');
+                        playSound('fail');
+                    }, 500);
+                }
+            }, 100);
+
+            // Show Result after delay
+            setTimeout(() => {
+                showResult(F, A, P, isSuccess);
+                logData(F, A, P, isSuccess);
+                elResetBtn.classList.remove('hidden');
+            }, 1500);
+        }
+
+        function showResult(F, A, P, isSuccess) {
+            elResultBox.classList.remove('hidden');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const calc = document.getElementById('math-calc');
+
+            if (isSuccess) {
+                title.innerText = "🎉 BERHASIL MENYEBERANG!";
+                title.className = "text-lg font-bold text-green-600";
+                desc.innerText = `Tekanan ${P} Pa masih di bawah batas aman. Papan kuat menahan beban!`;
+            } else {
+                title.innerText = "💀 TENGGELAM!";
+                title.className = "text-lg font-bold text-red-600";
+                desc.innerText = `Tekanan ${P} Pa terlalu besar! Papan tidak kuat menahan beban.`;
+            }
+
+            calc.innerText = `${F} N / ${A} m² = ${P} Pa`;
+        }
+
+        function logData(F, A, P, isSuccess) {
+            const tbody = document.getElementById('data-table-body');
+            const emptyRow = document.getElementById('empty-row');
+            if (emptyRow) emptyRow.remove();
+
+            const row = document.createElement('tr');
+            row.className = "border-b border-gray-100 hover:bg-gray-50 transition";
+            row.innerHTML = `
+                <td class="p-3 font-bold text-gray-500">#${state.trialCount}</td>
+                <td class="p-3">${data[state.char].name} (${F} N)</td>
+                <td class="p-3">${data[state.plank].name} (${A} m²)</td>
+                <td class="p-3 font-mono font-bold text-blue-600">${P} Pa</td>
+                <td class="p-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-bold ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                        ${isSuccess ? 'AMAN' : 'TENGGELAM'}
+                    </span>
+                </td>
+            `;
+            tbody.prepend(row); // Add new result to top
+        }
+
+        function clearTable() {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = `<tr id="empty-row"><td colspan="5" class="p-4 text-center text-gray-400 italic">Belum ada data misi. Silakan mulai simulasi!</td></tr>`;
+            state.trialCount = 0;
+        }
+        
+        function resetSim() {
+            resetAnimation();
+        }
+
+        function playSound(type) {
+            // Simple visual feedback implies sound, but keeping code silent to avoid autoplay policies
+            // In a real app, Audio() objects would go here.
+        }
+
+        // Initialize
+        selectChar('budi');
+        selectPlank('sempit');
+</script>
+</body>
+</html>
