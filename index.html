@@ -117,7 +117,7 @@
         <!-- Simulation View -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-blue-100 lg:col-span-2 relative flex flex-col">
             <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow border border-gray-200">
-                <span class="text-xs font-bold text-gray-600">BATAS AMAN: Maks 1500 Pa</span>
+                <span class="text-xs font-bold text-gray-600">BATAS AMAN: Maks 2100 Pa</span>
             </div>
 
             <!-- Visual Stage -->
@@ -256,7 +256,7 @@
             const F = data[state.char].f;
             const A = data[state.plank].a;
             const P = F / A;
-            const maxPressure = 1500; // Threshold
+            const maxPressure = 2100; // Threshold
             const isSuccess = P <= maxPressure;
 
             state.trialCount++;
@@ -284,7 +284,7 @@
                 showResult(F, A, P, isSuccess);
                 logData(F, A, P, isSuccess);
                 elResetBtn.classList.remove('hidden');
-            }, 1500);
+            }, 2100);
         }
 
         function showResult(F, A, P, isSuccess) {
